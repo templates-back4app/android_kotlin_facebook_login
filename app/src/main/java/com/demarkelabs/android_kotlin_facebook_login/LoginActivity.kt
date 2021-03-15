@@ -44,19 +44,19 @@ class LoginActivity : AppCompatActivity() {
                         dlg.dismiss()
                         ParseUser.logOut()
                         Toast.makeText(this,"The user cancelled the Facebook login.",Toast.LENGTH_LONG).show()
-                        Log.d("MyApp", "Uh oh. The user cancelled the Facebook login.")
+                        Log.d("FacebookLoginExample", "Uh oh. The user cancelled the Facebook login.")
                     }
                     user.isNew -> {
                         dlg.dismiss()
                         Toast.makeText(this,"User signed up and logged in through Facebook.",Toast.LENGTH_LONG).show()
-                        Log.d("MyApp", "User signed up and logged in through Facebook!")
+                        Log.d("FacebookLoginExample", "User signed up and logged in through Facebook!")
                         getUserDetailFromFB()
                     }
                     else -> {
                         dlg.dismiss()
                         Toast.makeText(this, "User logged in through Facebook.", Toast.LENGTH_LONG).show()
-                        Log.d("MyApp", "User logged in through Facebook!")
-                        showAlert("Oh, you!", "Welcome back!")
+                        Log.d("FacebookLoginExample", "User logged in through Facebook!")
+                        showAlert("Oh, you!", "Welcome back!",ParseUser.getCurrentUser())
                     }
                 }
             }
@@ -79,9 +79,9 @@ class LoginActivity : AppCompatActivity() {
                 }
                 user.saveInBackground {
                     if (it == null)
-                        showAlert("First Time Login!", "Welcome!")
+                        showAlert("First Time Login!", "Welcome!",user)
                     else
-                        showAlert("Error", it.message)
+                        showAlert("Error", it.message,null)
                 }
             }
         val parameters = Bundle()
@@ -90,13 +90,16 @@ class LoginActivity : AppCompatActivity() {
         request.executeAsync()
     }
 
-    private fun showAlert(title: String, message: String?) {
+    private fun showAlert(title: String, message: String?, user: ParseUser?) {
         val builder = AlertDialog.Builder(this)
             .setTitle(title)
             .setMessage(message)
-            .setPositiveButton("OK") { dialog: DialogInterface, _: Int ->
+            .setPositiveButton("OK") { dialog: DialogInterface, which: Int ->
                 dialog.cancel()
-                val intent = Intent(this, MainActivity::class.java)
+                val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                if (user != null) {
+                    intent.putExtra("info", "${user.username} \n\n\n Email: ${user.email}".trimIndent())
+                }
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
                 startActivity(intent)
             }
