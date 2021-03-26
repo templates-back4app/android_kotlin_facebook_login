@@ -29,11 +29,8 @@ class MainActivity : AppCompatActivity() {
 
 
         textView.text = getString(R.string.welcome) + "\n"
-        val intent = intent
-        if (intent != null) {
-            if (intent.getStringExtra("info") != null)
-                textView.text = "Welcome to My App\n" + getIntent().getStringExtra("info")
-        }
+        textView.text = "Welcome to My App\n${ParseUser.getCurrentUser().username}\n\n\n Email: ${ParseUser.getCurrentUser().email}".trimIndent()
+
         logout_button.setOnClickListener { v ->
             val dlg = ProgressDialog(this)
             dlg.setTitle("Please, wait a moment.")
@@ -78,7 +75,11 @@ class MainActivity : AppCompatActivity() {
         unlink_button.setOnClickListener {
             ParseFacebookUtils.unlinkInBackground(ParseUser.getCurrentUser()) {
                 if (it == null) {
-                    Toast.makeText(this,"The user is no longer associated with their Facebook account.",Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        this,
+                        "The user is no longer associated with their Facebook account.",
+                        Toast.LENGTH_LONG
+                    ).show()
                     Log.d("MyApp", "The user is no longer associated with their Facebook account.")
                 } else {
                     Toast.makeText(this, it.message, Toast.LENGTH_LONG).show()

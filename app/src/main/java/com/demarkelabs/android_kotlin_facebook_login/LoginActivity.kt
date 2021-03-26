@@ -34,29 +34,25 @@ class LoginActivity : AppCompatActivity() {
             dlg.show()
             val permissions: Collection<String> = listOf("public_profile", "email")
             ParseFacebookUtils.logInWithReadPermissionsInBackground(this, permissions) { user: ParseUser?, err: ParseException? ->
-                if (err != null) {
-                    dlg.dismiss()
-                    ParseUser.logOut()
-                    Log.e(TAG, "done: ", err)
-                }
+                dlg.dismiss()
                 when {
+                    err != null -> {
+                        Log.e("FacebookLoginExample", "done: ", err)
+                        Toast.makeText(this, err.message, Toast.LENGTH_LONG).show()
+                    }
                     user == null -> {
-                        dlg.dismiss()
-                        ParseUser.logOut()
-                        Toast.makeText(this,"The user cancelled the Facebook login.",Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, "The user cancelled the Facebook login.", Toast.LENGTH_LONG).show()
                         Log.d("FacebookLoginExample", "Uh oh. The user cancelled the Facebook login.")
                     }
                     user.isNew -> {
-                        dlg.dismiss()
-                        Toast.makeText(this,"User signed up and logged in through Facebook.",Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, "User signed up and logged in through Facebook.", Toast.LENGTH_LONG).show()
                         Log.d("FacebookLoginExample", "User signed up and logged in through Facebook!")
                         getUserDetailFromFB()
                     }
                     else -> {
-                        dlg.dismiss()
                         Toast.makeText(this, "User logged in through Facebook.", Toast.LENGTH_LONG).show()
                         Log.d("FacebookLoginExample", "User logged in through Facebook!")
-                        showAlert("Oh, you!", "Welcome back!",ParseUser.getCurrentUser())
+                        showAlert("Oh, you!", "Welcome back!")
                     }
                 }
             }
@@ -79,9 +75,9 @@ class LoginActivity : AppCompatActivity() {
                 }
                 user.saveInBackground {
                     if (it == null)
-                        showAlert("First Time Login!", "Welcome!",user)
+                        showAlert("First Time Login!", "Welcome!")
                     else
-                        showAlert("Error", it.message,null)
+                        showAlert("Error", it.message)
                 }
             }
         val parameters = Bundle()
@@ -90,16 +86,13 @@ class LoginActivity : AppCompatActivity() {
         request.executeAsync()
     }
 
-    private fun showAlert(title: String, message: String?, user: ParseUser?) {
+    private fun showAlert(title: String, message: String?) {
         val builder = AlertDialog.Builder(this)
             .setTitle(title)
             .setMessage(message)
             .setPositiveButton("OK") { dialog: DialogInterface, which: Int ->
                 dialog.cancel()
-                val intent = Intent(this@LoginActivity, MainActivity::class.java)
-                if (user != null) {
-                    intent.putExtra("info", "${user.username} \n\n\n Email: ${user.email}".trimIndent())
-                }
+                val intent = Intent(this, MainActivity::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
                 startActivity(intent)
             }
